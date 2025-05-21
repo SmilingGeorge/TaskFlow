@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -16,10 +17,12 @@ interface TaskFormProps {
   categories: string[];
 }
 
+const NO_CATEGORY_VALUE = "_taskform_none_";
+
 export function TaskForm({ onAddTask, categories }: TaskFormProps) {
   const [taskText, setTaskText] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [category, setCategory] = useState<string>("");
+  const [category, setCategory] = useState<string>(NO_CATEGORY_VALUE);
   const [newCategory, setNewCategory] = useState<string>("");
   const [dueDate, setDueDate] = useState<Date | undefined>();
 
@@ -27,17 +30,19 @@ export function TaskForm({ onAddTask, categories }: TaskFormProps) {
     e.preventDefault();
     if (taskText.trim() === "") return;
     
-    let finalCategory = category;
-    if (category === "new_category" && newCategory.trim() !== "") {
-      finalCategory = newCategory.trim();
-    } else if (category === "new_category") {
-      finalCategory = undefined; // No category if new is selected but empty
+    let taskCategoryToAdd: string | undefined;
+    if (category === "new_category") {
+      taskCategoryToAdd = newCategory.trim() || undefined;
+    } else if (category === NO_CATEGORY_VALUE) {
+      taskCategoryToAdd = undefined;
+    } else {
+      taskCategoryToAdd = category;
     }
     
-    onAddTask(taskText.trim(), priority, finalCategory, dueDate ? format(dueDate, "yyyy-MM-dd") : undefined);
+    onAddTask(taskText.trim(), priority, taskCategoryToAdd, dueDate ? format(dueDate, "yyyy-MM-dd") : undefined);
     setTaskText("");
     setPriority("medium");
-    setCategory("");
+    setCategory(NO_CATEGORY_VALUE);
     setNewCategory("");
     setDueDate(undefined);
   };
@@ -100,7 +105,7 @@ export function TaskForm({ onAddTask, categories }: TaskFormProps) {
                     <SelectValue placeholder="Category (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value={NO_CATEGORY_VALUE}>None</SelectItem>
                     {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
                     <SelectItem value="new_category">Create new category...</SelectItem>
                 </SelectContent>

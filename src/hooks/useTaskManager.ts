@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -6,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { isToday, isTomorrow, isPast, parseISO, isValid, startOfDay, addDays } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from './useNotifications';
+import { ALL_CATEGORIES_VALUE } from '@/components/tasks/FilterControls';
 
 
 const TASKS_STORAGE_KEY = 'taskflow-tasks';
@@ -21,7 +23,7 @@ export function useTaskManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<TaskFilterStatus>('all');
   const [filterPriority, setFilterPriority] = useState<TaskFilterPriority>('all');
-  const [filterCategory, setFilterCategory] = useState<string>(''); // Empty string for all categories
+  const [filterCategory, setFilterCategory] = useState<string>(ALL_CATEGORIES_VALUE); 
   const [filterDueDate, setFilterDueDate] = useState<TaskFilterDueDate>('all');
 
   // Load tasks from localStorage
@@ -57,7 +59,7 @@ export function useTaskManager() {
       text,
       completed: false,
       priority,
-      category: category === "" ? undefined : category,
+      category: category, // Already handles undefined if no category or "None" is selected
       dueDate,
       createdAt: new Date().toISOString(),
       order: tasks.length, // Append to the end
@@ -121,9 +123,15 @@ export function useTaskManager() {
         if (filterStatus === 'completed' && !task.completed) return false;
         // Priority filter
         if (filterPriority !== 'all' && task.priority !== filterPriority) return false;
+        
         // Category filter
-        if (filterCategory === 'uncategorized' && task.category) return false;
-        if (filterCategory && filterCategory !== 'uncategorized' && task.category !== filterCategory) return false;
+        if (filterCategory === 'uncategorized') {
+          if (task.category) return false; 
+        } else if (filterCategory !== ALL_CATEGORIES_VALUE) {
+          if (task.category !== filterCategory) return false; 
+        }
+        // If filterCategory is ALL_CATEGORIES_VALUE, all tasks pass this part of the filter.
+
         // Due date filter
         if (filterDueDate !== 'all') {
           if (!task.dueDate && filterDueDate !== 'nodate') return false;

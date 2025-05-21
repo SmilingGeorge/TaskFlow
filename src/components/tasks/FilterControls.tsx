@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,8 @@ interface FilterControlsProps {
   onFilterDueDateChange: (dueDate: TaskFilterDueDate) => void;
   categories: string[];
 }
+
+export const ALL_CATEGORIES_VALUE = "_filter_all_categories_";
 
 export function FilterControls({
   searchTerm,
@@ -86,7 +89,7 @@ export function FilterControls({
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value={ALL_CATEGORIES_VALUE}>All Categories</SelectItem>
               {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
               <SelectItem value="uncategorized">Uncategorized</SelectItem>
             </SelectContent>
